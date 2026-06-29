@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Übung: Zuordnung</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 650px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        p.instruction {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Spalten-Layout für größere Bildschirme */
+        @media (min-width: 600px) {
+            .game-area {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            .column {
+                flex: 1;
+            }
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .item {
+            background: #f8f9fa;
+            border: 2px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Interaktions-Zustände */
+        .item.selected {
+            border-color: var(--primary-color);
+            background-color: #e3effd;
+            transform: scale(1.02);
+        }
+
+        .item.matched {
+            background-color: #e8f8f0;
+            border-color: var(--success-color);
+            color: #27ae60;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            min-height: 24px;
+        }
+
+        .reset-btn {
+            display: block;
+            width: 100%;
+            max-width: 200px;
+            margin: 20px auto 0 auto;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: none;
+            transition: background 0.2s;
+        }
+
+        .reset-btn:hover {
+            background-color: #357abd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Russisch-Quiz: Neuigkeiten</h2>
+    <p class="instruction">Tippe zuerst auf ein russisches Wort und danach auf die passende deutsche Übersetzung.</p>
+
+    <div class="game-area">
+        <!-- Russische Wörter -->
+        <div class="column" id="russian-col">
+            <div class="item" data-id="1">Что нового</div>
+            <div class="item" data-id="2">Привет</div>
+            <div class="item" data-id="3">Что у вас нового</div>
+        </div>
+
+        <!-- Deutsche Übersetzungen -->
+        <div class="column" id="german-col">
+            <!-- Die IDs matchen mit den russischen Gegenstücken -->
+            <div class="item" data-match="2">Hallo</div>
+            <div class="item" data-match="3">Was gibt es Neues bei euch?</div>
+            <div class="item" data-match="1">Was gibt es Neues?</div>
+        </div>
+    </div>
+
+    <div class="feedback" id="feedback-msg"></div>
+    <button class="reset-btn" id="reset-btn" onclick="resetGame()">Nochmal spielen</button>
+</div>
+
+<script>
+    let selectedRussian = null;
+    let matchesFound = 0;
+    const totalMatches = document.querySelectorAll('#russian-col .item').length;
+
+    // Spalten mischen für den Spieleffekt bei jedem Laden
+    function shuffleNodes(parent) {
+        for (let i = parent.children.length; i >= 0; i--) {
+            parent.appendChild(parent.children[Math.random() * i | 0]);
+        }
+    }
+    shuffleNodes(document.getElementById('russian-col'));
+    shuffleNodes(document.getElementById('german-col'));
+
+    // Event-Listener für die russische Spalte
+    document.getElementById('russian-col').addEventListener('click', function(e) {
+        const clickedItem = e.target.closest('.item');
+        if (!clickedItem || clickedItem.classList.contains('matched')) return;
+
+        // Vorherige Auswahl aufheben
+        if (selectedRussian) {
+            selectedRussian.classList.remove('selected');
+        }
+
+        selectedRussian = clickedItem;
+        selectedRussian.classList.add('selected');
+        clearFeedback();
+    });
+
+    // Event-Listener für die deutsche Spalte
+    document.getElementById('german-col').addEventListener('click', function(e) {
+        const clickedItem = e.target.closest('.item');
+        if (!clickedItem || clickedItem.classList.contains('matched')) return;
+
+        if (!selectedRussian) {
+            showFeedback('Wähle zuerst ein russisches Wort aus!', 'var(--error-color)');
+            return;
+        }
+
+        const russianId = selectedRussian.getAttribute('data-id');
+        const germanMatchId = clickedItem.getAttribute('data-match');
+
+        if (russianId === germanMatchId) {
+            // Richtig gelöst
+            selectedRussian.classList.remove('selected');
+            selectedRussian.classList.add('matched');
+            clickedItem.classList.add('matched');
+            selectedRussian = null;
+            matchesFound++;
+            
+            showFeedback('Richtig! 🎉', 'var(--success-color)');
+
+            if (matchesFound === totalMatches) {
+                showFeedback('Super gemacht! Alles richtig zugeordnet.', 'var(--success-color)');
+                document.getElementById('reset-btn').style.display = 'block';
+            }
+        } else {
+            // Falsche Zuordnung
+            showFeedback('Das passt nicht zusammen. Versuch es noch einmal!', 'var(--error-color)');
+            selectedRussian.classList.remove('selected');
+            selectedRussian = null;
+        }
+    });
+
+    function showFeedback(text, color) {
+        const msg = document.getElementById('feedback-msg');
+        msg.innerText = text;
+        msg.style.color = color;
+    }
+
+    function clearFeedback() {
+        document.getElementById('feedback-msg').innerText = '';
+    }
+
+    function resetGame() {
+        location.reload();
+    }
+</script>
+
+</body>
+</html>
