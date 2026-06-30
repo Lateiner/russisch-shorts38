@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Übung: Lückentext mit Dropdown</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 650px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        p.instruction {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        /* Dialog-Container */
+        .dialog-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+
+        .dialog-row {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #cbd5e1;
+            line-height: 1.6;
+            font-size: 1.1rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dialog-row.active-row {
+            border-left-color: var(--primary-color);
+            background-color: #f0f7ff;
+        }
+
+        /* Styling für das Dropdown */
+        .inline-select {
+            font-size: 1.05rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            background-color: white;
+            color: var(--text-color);
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .inline-select:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* Feedback-Zustände für Dropdowns */
+        .inline-select.correct {
+            background-color: #e8f8f0;
+            border-color: var(--success-color);
+            color: #27ae60;
+            pointer-events: none;
+        }
+
+        .inline-select.wrong {
+            background-color: #fdedec;
+            border-color: var(--error-color);
+            color: var(--error-color);
+        }
+
+        .translation-hint {
+            display: block;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            width: 100%;
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        .global-feedback {
+            text-align: center;
+            font-weight: 600;
+            min-height: 24px;
+            margin-bottom: 15px;
+        }
+
+        .nav-btn {
+            display: block;
+            width: 100%;
+            max-width: 180px;
+            margin: 10px auto 0 auto;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: center;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--border-color);
+            color: #7f8c8d;
+        }
+
+        .btn-outline:hover {
+            background-color: #f8f9fa;
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Lückentext: Das Gespräch</h2>
+    <p class="instruction">Wähle für jede Lücke das grammatikalisch und kontextuell passende russische Wort aus.</p>
+
+    <div class="dialog-container">
+        
+        <!-- Zeile 1 -->
+        <div class="dialog-row">
+            <span>Привет! Что</span>
+            <select class="inline-select" data-answer="нового" onchange="checkLive(this)">
+                <option value="" disabled selected>?</option>
+                <option value="новое">новое</option>
+                <option value="нового">нового</option>
+                <option value="новинка">новинка</option>
+            </select>
+            <span>?</span>
+            <span class="translation-hint">Übersetzung: Hallo! Was gibt es Neues?</span>
+        </div>
+
+        <!-- Zeile 2 -->
+        <div class="dialog-row">
+            <span>Я давно не видела своего</span>
+            <select class="inline-select" data-answer="друга" onchange="checkLive(this)">
+                <option value="" disabled selected>?</option>
+                <option value="друг">друг</option>
+                <option value="друга">друга</option>
+                <option value="другом">другом</option>
+            </select>
+            <span>или знакомого.</span>
+            <span class="translation-hint">Übersetzung: Ich habe einen meiner Freunde oder Bekannten lange nicht gesehen.</span>
+        </div>
+
+        <!-- Zeile 3 -->
+        <div class="dialog-row">
+            <span>Что случилось в твоей</span>
+            <select class="inline-select" data-answer="жизни" onchange="checkLive(this)">
+                <option value="" disabled selected>?</option>
+                <option value="жизнь">жизнь</option>
+                <option value="жизни">жизни</option>
+                <option value="жизнью">жизнью</option>
+            </select>
+            <span>?</span>
+            <span class="translation-hint">Übersetzung: Was ist in deinem Leben passiert?</span>
+        </div>
+
+        <!-- Zeile 4 -->
+        <div class="dialog-row">
+            <span>Напишите в комментариях, Что у</span>
+            <select class="inline-select" data-answer="вас" onchange="checkLive(this)">
+                <option value="" disabled selected>?</option>
+                <option value="вы">вы</option>
+                <option value="вас">вас</option>
+                <option value="вам">вам</option>
+            </select>
+            <span>нового!</span>
+            <span class="translation-hint">Übersetzung: Schreibt in die Kommentare, was es bei euch Neues gibt!</span>
+        </div>
+
+    </div>
+
+    <div class="global-feedback" id="feedback-zone"></div>
+    <button class="nav-btn btn-outline" onclick="resetDropdowns()">Neustart</button>
+</div>
+
+<script>
+    function checkLive(selectElement) {
+        const selectedValue = selectElement.value;
+        const correctAnswer = selectElement.getAttribute('data-answer');
+        const row = selectElement.closest('.dialog-row');
+
+        if (selectedValue === correctAnswer) {
+            selectElement.classList.remove('wrong');
+            selectElement.classList.add('correct');
+            row.classList.remove('active-row');
+            checkGlobalStatus();
+        } else {
+            selectElement.classList.remove('correct');
+            selectElement.classList.add('wrong');
+            row.classList.add('active-row');
+            document.getElementById('feedback-zone').innerText = "Leider nicht richtig. Versuch eine andere Form!";
+            document.getElementById('feedback-zone').style.color = "var(--error-color)";
+        }
+    }
+
+    function checkGlobalStatus() {
+        const allSelects = document.querySelectorAll('.inline-select');
+        let allCorrect = true;
+
+        allSelects.forEach(select => {
+            if (!select.classList.contains('correct')) {
+                allCorrect = false;
+            }
+        });
+
+        const feedbackZone = document.getElementById('feedback-zone');
+        if (allCorrect) {
+            feedbackZone.innerText = "Hervorragend! Du hast alle Lücken perfekt ausgefüllt. 🎉";
+            feedbackZone.style.color = "var(--success-color)";
+        } else {
+            feedbackZone.innerText = "Das sieht gut aus! Mach weiter.";
+            feedbackZone.style.color = "var(--primary-color)";
+        }
+    }
+
+    function resetDropdowns() {
+        const allSelects = document.querySelectorAll('.inline-select');
+        allSelects.forEach(select => {
+            select.className = 'inline-select';
+            select.selectedIndex = 0;
+            select.closest('.dialog-row').classList.remove('active-row');
+        });
+        document.getElementById('feedback-zone').innerText = "";
+    }
+</script>
+
+</body>
+</html>
