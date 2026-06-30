@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Übung: Kontext-Auswahl</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 600px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: var(--border-color);
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 20%;
+            transition: width 0.3s ease;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        p.instruction {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .situation-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            padding: 18px;
+            border-radius: 4px 8px 8px 4px;
+            font-size: 1.05rem;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background-color: #ffffff;
+            border: 2px solid var(--border-color);
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            text-align: left;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-prefix {
+            font-weight: bold;
+            margin-right: 12px;
+            color: #7f8c8d;
+        }
+
+        @media (hover: hover) {
+            .option-btn:hover:not(.disabled) {
+                border-color: var(--primary-color);
+                background-color: #f0f7ff;
+            }
+        }
+
+        /* Feedback-Zustände */
+        .option-btn.correct {
+            background-color: #e8f8f0;
+            border-color: var(--success-color);
+            color: #27ae60;
+        }
+        .option-btn.correct .option-prefix {
+            color: #27ae60;
+        }
+
+        .option-btn.wrong {
+            background-color: #fdedec;
+            border-color: var(--error-color);
+            color: var(--error-color);
+        }
+        .option-btn.wrong .option-prefix {
+            color: var(--error-color);
+        }
+
+        .option-btn.disabled {
+            pointer-events: none;
+        }
+
+        .explanation-text {
+            text-align: center;
+            font-weight: 600;
+            min-height: 40px;
+            margin-top: 15px;
+            line-height: 1.4;
+        }
+
+        .nav-btn {
+            display: block;
+            width: 100%;
+            max-width: 180px;
+            margin: 15px auto 0 auto;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #357abd;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--border-color);
+            color: #7f8c8d;
+        }
+
+        .btn-outline:hover {
+            background-color: #f8f9fa;
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+    </div>
+
+    <h2 id="headline">Frage 1 von 5</h2>
+    <p class="instruction">Lies die Alltagssituation und wähle die am besten passende russische Reaktion aus.</p>
+
+    <div class="situation-box" id="situation">
+        <!-- Hier wird die Situation geladen -->
+    </div>
+
+    <div class="options-list" id="options-container">
+        <!-- Hier werden die Optionen geladen -->
+    </div>
+
+    <div class="explanation-text" id="explanation"></div>
+
+    <button class="nav-btn btn-primary" id="next-btn" style="display: none;" onclick="nextQuestion()">Nächste Frage</button>
+    <button class="nav-btn btn-outline" id="reset-btn" onclick="resetQuiz()">Neustart</button>
+</div>
+
+<script>
+    const quizData = [
+        {
+            situation: "Du triffst einen alten Bekannten nach zwei Jahren auf der Straße. Wie fragst du ihn nach Neuigkeiten?",
+            options: [
+                { text: "Привет", correct: false },
+                { text: "Что нового", correct: true },
+                { text: "Хорошо", correct: false }
+            ],
+            explanation: "Richtig! „Что нового“ bedeutet „Was gibt es Neues?“ und passt perfekt in dieser Situation."
+        },
+        {
+            situation: "Du schreibst einen Beitrag in einem russischen Internetforum und möchtest die ganze Community (mehrere Personen) fragen, was sich bei ihnen getan hat. Wie formulierst du das?",
+            options: [
+                { text: "Что у вас нового", correct: true },
+                { text: "Привет", correct: false },
+                { text: "Что нового", correct: false }
+            ],
+            explanation: "Exakt! Durch das Pronomen „у вас“ (bei euch/Ihnen) richtest du dich an eine Gruppe."
+        },
+        {
+            situation: "Ein Freund fragt dich auf Russisch „Что нового?“. Was möchte er im Kern von dir wissen?",
+            options: [
+                { text: "Er möchte wissen, ob du Zeit hast.", correct: false },
+                { text: "Er fragt, wie spät es gerade ist.", correct: false },
+                { text: "Er fragt, was in deinem Leben passiert ist und worüber du erzählen kannst.", correct: true }
+            ],
+            explanation: "Genau! Es ist die klassische Einladung, von Erlebnissen aus der letzten Zeit zu berichten."
+        },
+        {
+            situation: "Du siehst einen guten Freund und willst ihn einfach nur kurz und locker grüßen, bevor du das Gespräch beginnst. Was sagst du zuerst?",
+            options: [
+                { text: "Что нового", correct: false },
+                { text: "Привет", correct: true },
+                { text: "Что у вас нового", correct: false }
+            ],
+            explanation: "Perfekt! „Привет“ ist das lockere russische Wort für „Hallo“."
+        },
+        {
+            situation: "Jemand fordert dich auf Russisch auf: „Напишите в комментариях Что у вас нового“. Was sollst du tun?",
+            options: [
+                { text: "Einen Brief per Post verschicken.", correct: false },
+                { text: "In den Kommentaren posten, was es bei dir Neues gibt.", correct: true },
+                { text: "Ein Buch über Grammatik lesen.", correct: false }
+            ],
+            explanation: "Richtig! Das ist die Aufforderung, ein Update in der Kommentarspalte zu hinterlassen."
+        }
+    ];
+
+    let currentIndex = 0;
+    let hasAnswered = false;
+
+    function loadQuestion() {
+        hasAnswered = false;
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('explanation').innerText = '';
+        
+        const currentQuiz = quizData[currentIndex];
+        
+        // UI Texte setzen
+        document.getElementById('headline').innerText = `Frage ${currentIndex + 1} von 5`;
+        document.getElementById('situation').innerText = currentQuiz.situation;
+        document.getElementById('progress').style.width = `${((currentIndex + 1) / quizData.length) * 100}%`;
+
+        // Optionen aufbauen
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+
+        const prefixes = ['A', 'B', 'C', 'D'];
+
+        currentQuiz.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            
+            btn.innerHTML = `<span class="option-prefix">${prefixes[idx]})</span> ${opt.text}`;
+            
+            btn.addEventListener('click', () => handleSelection(btn, opt.correct, currentQuiz.explanation));
+            container.appendChild(btn);
+        });
+    }
+
+    function handleSelection(selectedBtn, isCorrect, explanationText) {
+        if (hasAnswered) return;
+        hasAnswered = true;
+
+        const allButtons = document.querySelectorAll('.option-btn');
+        const feedbackEl = document.getElementById('explanation');
+
+        // Alle Knöpfe für weitere Klicks sperren
+        allButtons.forEach(btn => btn.classList.add('disabled'));
+
+        if (isCorrect) {
+            selectedBtn.classList.add('correct');
+            feedbackEl.innerText = explanationText;
+            feedbackEl.style.color = 'var(--success-color)';
+        } else {
+            selectedBtn.classList.add('wrong');
+            feedbackEl.innerText = "Das ist leider nicht ganz richtig. Probier es beim nächsten Mal!";
+            feedbackEl.style.color = 'var(--error-color)';
+
+            // Richtige Option zur Aufklärung grün hervorheben
+            quizData[currentIndex].options.forEach((opt, idx) => {
+                if (opt.correct) {
+                    allButtons[idx].classList.add('correct');
+                }
+            });
+        }
+
+        // Zeige Weiter-Button oder Abschluss-Feedback
+        if (currentIndex < quizData.length - 1) {
+            document.getElementById('next-btn').style.display = 'block';
+        } else {
+            feedbackEl.innerText += "\n\n🏆 Glückwunsch! Du hast das Quiz beendet.";
+            feedbackEl.style.color = 'var(--text-color)';
+        }
+    }
+
+    function nextQuestion() {
+        if (currentIndex < quizData.length - 1) {
+            currentIndex++;
+            loadQuestion();
+        }
+    }
+
+    function resetQuiz() {
+        currentIndex = 0;
+        loadQuestion();
+    }
+
+    // Beim Laden starten
+    window.onload = loadQuestion;
+</script>
+
+</body>
+</html>
