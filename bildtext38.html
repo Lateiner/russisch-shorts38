@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Übung: Situations-Check</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 600px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: var(--border-color);
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 16.6%;
+            transition: width 0.3s ease;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        p.instruction {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .phrase-bubble {
+            background-color: #e3effd;
+            border-left: 4px solid var(--primary-color);
+            padding: 12px;
+            border-radius: 4px 8px 8px 4px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .scene-card {
+            background: #f8f9fa;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .scene-emoji {
+            font-size: 3.5rem;
+            user-select: none;
+        }
+
+        .scene-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .choice-buttons {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .btn-choice {
+            flex: 1;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: 2px solid var(--border-color);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        @media (hover: hover) {
+            .btn-choice:hover:not(.disabled) {
+                border-color: var(--primary-color);
+                background-color: #f0f7ff;
+            }
+        }
+
+        .btn-choice.disabled {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .btn-choice.selected-correct {
+            background-color: var(--success-color) !important;
+            border-color: var(--success-color) !important;
+            color: white !important;
+            opacity: 1 !important;
+        }
+
+        .btn-choice.selected-wrong {
+            background-color: var(--error-color) !important;
+            border-color: var(--error-color) !important;
+            color: white !important;
+            opacity: 1 !important;
+        }
+
+        .feedback-box {
+            text-align: center;
+            font-weight: 600;
+            font-size: 1rem;
+            min-height: 50px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .nav-btn {
+            display: block;
+            width: 100%;
+            max-width: 180px;
+            margin: 10px auto 0 auto;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #357abd;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--border-color);
+            color: #7f8c8d;
+        }
+
+        .btn-outline:hover {
+            background-color: #f8f9fa;
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+    </div>
+
+    <h2 id="headline">Situation 1 von 6</h2>
+    <p class="instruction">Ist die russische Frage in dieser Alltagssituation angemessen?</p>
+
+    <div class="phrase-bubble">
+        „Что нового?“ / „Что у вас нового?“
+    </div>
+
+    <div class="scene-card">
+        <div class="scene-emoji" id="scene-emoji">🤗</div>
+        <div class="scene-title" id="scene-title">Laden...</div>
+        
+        <div class="choice-buttons">
+            <button class="btn-choice" id="btn-yes" onclick="handleChoice(true)">Angemessen</button>
+            <button class="btn-choice" id="btn-no" onclick="handleChoice(false)">Unangemessen</button>
+        </div>
+    </div>
+
+    <div class="feedback-box" id="feedback-message"></div>
+    
+    <button class="nav-btn btn-primary" id="next-btn" style="display: none;" onclick="nextScene()">Nächste Situation</button>
+    <button class="nav-btn btn-outline" id="reset-btn" onclick="resetGame()">Neustart</button>
+</div>
+
+<script>
+    const allScenes = [
+        {
+            emoji: "👨‍🏫",
+            title: "Ein strenger Lehrer im offiziellen Unterricht",
+            isCorrect: false,
+            feedback: "Richtig bewertet! Im offiziellen Schulkontext mit Lehrkräften ist diese informelle Frage unhöflich."
+        },
+        {
+            emoji: "🤗",
+            title: "Zwei gute Freunde, die sich lange nicht sahen",
+            isCorrect: true,
+            feedback: "Richtig bewertet! Gute Freunde sind das perfekte Beispiel aus dem gelernten Transkript."
+        },
+        {
+            emoji: "🚌",
+            title: "Ein völlig fremder Fahrgast im Linienbus",
+            isCorrect: false,
+            feedback: "Richtig bewertet! Wildfremde Menschen im Bus nach privaten Lebens-Updates zu fragen, gilt als unpassend."
+        },
+        {
+            emoji: "🧒👧",
+            title: "Geschwister, die sich am Wochenende besuchen",
+            isCorrect: true,
+            feedback: "Richtig bewertet! Unter Geschwistern und in der Familie ist diese informelle Frage absolut üblich."
+        },
+        {
+            emoji: "💼",
+            title: "Der zukünftige Chef beim ernsten Vorstellungsgespräch",
+            isCorrect: false,
+            feedback: "Richtig bewertet! Im offiziellen Bewerbungsgespräch fordert man den potenziellen Chef nicht so locker auf."
+        },
+        {
+            emoji: "🏡",
+            title: "Ein netter Nachbar, den man im Treppenhaus trifft",
+            isCorrect: true,
+            feedback: "Richtig bewertet! Einen bekannten Nachbarn fragt man im lockeren Smalltalk gern nach Neuigkeiten."
+        }
+    ];
+
+    let currentOrder = [];
+    let currentIndex = 0;
+    let hasAnswered = false;
+
+    function initGame() {
+        currentIndex = 0;
+        // Reihenfolge zufällig mischen
+        currentOrder = [...allScenes].sort(() => Math.random() - 0.5);
+        loadScene();
+    }
+
+    function loadScene() {
+        hasAnswered = false;
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('feedback-message').innerText = "";
+        
+        const btnYes = document.getElementById('btn-yes');
+        const btnNo = document.getElementById('btn-no');
+        btnYes.className = "btn-choice";
+        btnNo.className = "btn-choice";
+
+        const currentScene = currentOrder[currentIndex];
+        
+        // UI Texte setzen
+        document.getElementById('headline').innerText = `Situation ${currentIndex + 1} von 6`;
+        document.getElementById('scene-emoji').innerText = currentScene.emoji;
+        document.getElementById('scene-title').innerText = currentScene.title;
+        document.getElementById('progress').style.width = `${((currentIndex + 1) / currentOrder.length) * 100}%`;
+    }
+
+    function handleChoice(studentChoice) {
+        if (hasAnswered) return;
+        hasAnswered = true;
+
+        const currentScene = currentOrder[currentIndex];
+        const btnYes = document.getElementById('btn-yes');
+        const btnNo = document.getElementById('btn-no');
+        const feedbackEl = document.getElementById('feedback-message');
+
+        btnYes.classList.add('disabled');
+        btnNo.classList.add('disabled');
+
+        const isSelectionCorrect = (studentChoice === currentScene.isCorrect);
+
+        if (isSelectionCorrect) {
+            feedbackEl.style.color = "var(--success-color)";
+            feedbackEl.innerText = "✓ " + currentScene.feedback;
+            if (studentChoice === true) btnYes.classList.add('selected-correct');
+            else btnNo.classList.add('selected-correct');
+        } else {
+            feedbackEl.style.color = "var(--error-color)";
+            feedbackEl.innerText = "✗ Das stimmt nicht ganz. " + currentScene.feedback;
+            if (studentChoice === true) btnYes.classList.add('selected-wrong');
+            else btnNo.classList.add('selected-wrong');
+        }
+
+        // Steuerung der Navigations-Buttons
+        if (currentIndex < currentOrder.length - 1) {
+            document.getElementById('next-btn').style.display = 'block';
+        } else {
+            feedbackEl.innerText += "\n\n🏆 Großartig! Du hast alle Situationen erfolgreich durchgearbeitet.";
+            feedbackEl.style.color = "var(--text-color)";
+        }
+    }
+
+    function nextScene() {
+        if (currentIndex < currentOrder.length - 1) {
+            currentIndex++;
+            loadScene();
+        }
+    }
+
+    function resetGame() {
+        initGame();
+    }
+
+    // Beim ersten Start initialisieren
+    window.onload = initGame;
+</script>
+
+</body>
+</html>
