@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch-Lernkartei: Alltagsszenen & Vokabeln</title>
+    <style>
+        :root {
+            --bg-gradient-start: #e8f5e9;
+            --bg-gradient-end: #c8e6c9;
+            --primary-green: #2e7d32;
+            --primary-hover: #1b5e20;
+            --light-green: #a5d6a7;
+            --accent-green: #81c784;
+            --card-front-bg: #ffffff;
+            --card-back-bg: #f1f8e9;
+            --text-dark: #1b5e20;
+            --text-muted: #558b2f;
+            --shadow: 0 8px 25px rgba(46, 125, 50, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            color: #2e7d32;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 30px 25px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            text-align: center;
+            margin-bottom: 5px;
+            color: var(--primary-green);
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .progress-box {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary-green);
+            margin-bottom: 15px;
+            background: var(--bg-gradient-start);
+            padding: 4px 14px;
+            border-radius: 12px;
+        }
+
+        /* 3D-Flip Kartenelemente */
+        .flashcard-wrapper {
+            width: 100%;
+            height: 300px;
+            perspective: 1000px;
+            cursor: pointer;
+            margin-bottom: 25px;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            border-radius: 16px;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            border: 3px solid var(--light-green);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .card-front {
+            background-color: var(--card-front-bg);
+            color: var(--text-dark);
+        }
+
+        .card-back {
+            background-color: var(--card-back-bg);
+            color: var(--primary-green);
+            transform: rotateY(180deg);
+            border-color: var(--accent-green);
+        }
+
+        .vocab-text {
+            font-weight: bold;
+            line-height: 1.3;
+            width: 100%;
+            word-wrap: break-word;
+        }
+
+        .card-front .vocab-text {
+            font-size: 2.2rem; /* Basis-Schriftgröße, wird dynamisch herabskaliert */
+        }
+
+        .card-back .vocab-text {
+            font-size: 1.6rem;
+            font-style: italic;
+        }
+
+        .note-text {
+            font-size: 0.95rem;
+            color: #666;
+            margin-top: 15px;
+            font-weight: normal;
+            border-top: 1px dashed var(--light-green);
+            padding-top: 8px;
+            width: 80%;
+        }
+
+        /* Buttons und Steuerungen */
+        .controls-grid {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .nav-row, .action-row {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+
+        .btn-main {
+            background-color: var(--primary-green);
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
+        }
+
+        .btn-main:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-sub {
+            background-color: var(--bg-gradient-start);
+            color: var(--primary-green);
+            border: 2px solid var(--light-green);
+        }
+
+        .btn-sub:hover {
+            background-color: var(--bg-gradient-end);
+        }
+
+        .keyboard-info {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 1.35rem; }
+            .flashcard-wrapper { height: 260px; }
+            .card-front .vocab-text { font-size: 1.8rem; }
+            .card-back .vocab-text { font-size: 1.4rem; }
+            .btn { padding: 12px; font-size: 0.95rem; }
+            .keyboard-info { display: none; } /* Verstecke Hotkeys auf Smartphones */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Russisch-Lernkartei</h1>
+    <div class="subtitle">Thema: Alltagsszenen & Fragen nach Neuigkeiten</div>
+
+    <div class="progress-box" id="progress-display">1 / 50</div>
+
+    <div class="flashcard-wrapper" onclick="flipCard()" aria-label="Karteikarte umdrehen">
+        <div class="flashcard" id="card-object">
+            <!-- Vorderseite -->
+            <div class="card-face card-front">
+                <div class="vocab-text" id="front-text">Laden...</div>
+                <div class="note-text" id="front-note" style="display: none;"></div>
+            </div>
+            <!-- Rückseite -->
+            <div class="card-face card-back">
+                <div class="vocab-text" id="back-text">Laden...</div>
+                <div class="note-text" id="back-note" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls-grid">
+        <div class="nav-row">
+            <button class="btn btn-sub" onclick="prevCard()">← Vorherige</button>
+            <button class="btn btn-main" onclick="nextCard()">Nächste →</button>
+        </div>
+        <div class="action-row">
+            <button class="btn btn-sub" onclick="shuffleCards()">🎲 Mischen</button>
+            <button class="btn btn-sub" onclick="goToStart()">↩ An den Anfang</button>
+        </div>
+    </div>
+
+    <div class="keyboard-info">
+        <strong>Tastatur-Steuerung am PC:</strong><br>
+        Leertaste / Enter: Umdrehen &nbsp;|&nbsp; Pfeiltasten ← / →: Navigation &nbsp;|&nbsp; Pos1 (Home): Anfang
+    </div>
+</div>
+
+<script>
+    // Strukturierte Vokabelliste extrahiert aus den Vorgaben
+    const baseVocabulary = [
+        { front: "приве́т", back: "hallo / hi" },
+        { front: "что", back: "was" },
+        { front: "у", back: "bei / von" },
+        { front: "вас", back: "euch / Ihnen", backNote: "Form von: вы" },
+        { front: "но́вый", back: "neu" },
+        { front: "что но́вого?", back: "was gibt's Neues?" },
+        { front: "что у вас но́вого?", back: "was gibt es bei euch / Ihnen Neues?" },
+        { front: "ничего́", back: "nichts / es geht so" },
+        { front: "осо́бенный", back: "besonderer / besondere / besonderes" },
+        { front: "ничего́ осо́бенного", back: "nichts Besonderes" },
+        { front: "всё", back: "alles" },
+        { front: "по-ста́рому", back: "beim Alten / wie immer" },
+        { front: "всё по-ста́рому", back: "alles beim Alten" },
+        { front: "а", back: "und / aber", backNote: "als Gegenüberstellung" },
+        { front: "тебя́", back: "dir / dich", backNote: "Form von: ты" },
+        { front: "а у тебя́?", back: "und bei dir?" },
+        { front: "случа́ться / случи́ться", back: "passieren / geschehen", frontNote: "NSV / SV" },
+        { front: "что случи́лось?", back: "was ist passiert?" },
+        { front: "в", back: "in" },
+        { front: "твой", back: "dein / deine / deines" },
+        { front: "жинь", back: "Leben", frontNote: "f" },
+        { front: "что случи́лось в твое́й жи́зни?", back: "was ist in deinem Leben passiert?" },
+        { front: "написа́ть / писа́ть", back: "schreiben", frontNote: "SV / NSV" },
+        { front: "напиши́те", back: "schreiben Sie / schreibt", backNote: "Befehlsform" },
+        { front: "коммента́рий", back: "Kommentar" },
+        { front: "в коммента́риях", back: "in den Kommentaren" },
+        { front: "напиши́те в коммента́риях", back: "schreibt / schreiben Sie in die Kommentare" },
+        { front: "друг", back: "Freund" },
+        { front: "brat", back: "Bruder" },
+        { front: "сестра́", back: "Schwester" },
+        { front: "сосе́д", back: "Nachbar" },
+        { front: "учи́тель", back: "Lehrer" },
+        { front: "урок", back: "Unterricht / Lektion" },
+        { front: "на уро́ке", back: "im Unterricht" },
+        { front: "авто́бус", back: "Bus" },
+        { front: "в авто́бусе", back: "im Bus" },
+        { front: "незнако́мец", back: "Fremder / unbekannte Person" },
+        { front: "нача́льник", back: "Chef / Vorgesetzter" },
+        { front: "собесе́дование", back: "Vorstellungsgespräch" },
+        { front: "на собесе́довании", back: "beim Vorstellungsgespräch" },
+        { front: "официа́льный", back: "offiziell" },
+        { front: "неофициа́льный", back: "inoffiziell / informell" },
+        { front: "ситуа́ция", back: "Situation" },
+        { front: "разгово́р", back: "Gespräch / Dialog" },
+        { front: "спра́шивать / спроси́ть", back: "fragen", frontNote: "NSV / SV" },
+        { front: "отвеча́ть / отве́тить", back: "antworten", frontNote: "NSV / SV" },
+        { front: "встреча́ть / встре́тить", back: "treffen / begegnen", frontNote: "NSV / SV" },
+        { front: "приве́тствовать / поприве́тствовать", back: "begrüßen", frontNote: "NSV / SV" },
+        { front: "узнава́ть / узна́ть", back: "erfahren / wiedererkennen", frontNote: "NSV / SV" },
+        { front: "расска́зывать / рассказа́ть", back: "erzählen", frontNote: "NSV / SV" }
+    ];
+
+    let currentDeck = [...baseVocabulary];
+    let currentIndex = 0;
+
+    const cardObj = document.getElementById('card-object');
+    const frontTextEl = document.getElementById('front-text');
+    const frontNoteEl = document.getElementById('front-note');
+    const backTextEl = document.getElementById('back-text');
+    const backNoteEl = document.getElementById('back-note');
+    const progressEl = document.getElementById('progress-display');
+
+    // Karte aktualisieren und Textgröße dynamisch anpassen
+    function updateCard() {
+        cardObj.classList.remove('flipped'); // Immer zuerst auf Vorderseite drehen
+        
+        setTimeout(() => {
+            const cardData = currentDeck[currentIndex];
+            
+            // Texte einsetzen
+            frontTextEl.innerText = cardData.front;
+            backTextEl.innerText = cardData.back;
+
+            // Optionale Notizen handhaben
+            if(cardData.frontNote) {
+                frontNoteEl.innerText = `(${cardData.frontNote})`;
+                frontNoteEl.style.display = 'block';
+            } else {
+                frontNoteEl.style.display = 'none';
+            }
+
+            if(cardData.backNote) {
+                backNoteEl.innerText = `(${cardData.backNote})`;
+                backNoteEl.style.display = 'block';
+            } else {
+                backNoteEl.style.display = 'none';
+            }
+
+            // Fortschrittsanzeige updaten
+            progressEl.innerText = `${currentIndex + 1} / ${currentDeck.length}`;
+
+            // Dynamische Schriftgrößen-Korrektur (Schutz vor Textüberlauf)
+            autoScaleText(frontTextEl, 2.2);
+            autoScaleText(backTextEl, 1.6);
+        }, 150);
+    }
+
+    function autoScaleText(element, baseSizeRem) {
+        let currentSize = baseSizeRem;
+        element.style.fontSize = currentSize + "rem";
+        
+        // Reduziere Schriftgröße in 0.1er Schritten, wenn der Text zu lang wird
+        while ((element.scrollHeight > element.offsetHeight || element.scrollWidth > element.offsetWidth) && currentSize > 1.0) {
+            currentSize -= 0.1;
+            element.style.fontSize = currentSize + "rem";
+        }
+    }
+
+    // Interaktionsfunktionen
+    function flipCard() {
+        cardObj.classList.toggle('flipped');
+    }
+
+    function nextCard() {
+        if (currentIndex < currentDeck.length - 1) {
+            currentIndex++;
+        } else {
+            currentIndex = 0; // Endlos-Schleife am Ende
+        }
+        updateCard();
+    }
+
+    function prevCard() {
+        if (currentIndex > 0) {
+            currentIndex--;
+        } else {
+            currentIndex = currentDeck.length - 1; // Endlos-Schleife am Anfang
+        }
+        updateCard();
+    }
+
+    function shuffleCards() {
+        // Fisher-Yates Shuffle-Algorithmus
+        for (let i = currentDeck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+        }
+        currentIndex = 0;
+        updateCard();
+    }
+
+    function goToStart() {
+        currentIndex = 0;
+        updateCard();
+    }
+
+    // Tastatur-Events abfangen
+    document.addEventListener('keydown', function(event) {
+        switch(event.key) {
+            case ' ':
+            case 'Enter':
+                event.preventDefault(); // Verhindert das Scrollen bei der Leertaste
+                flipCard();
+                break;
+            case 'ArrowRight':
+                nextCard();
+                break;
+            case 'ArrowLeft':
+                prevCard();
+                break;
+            case 'Home':
+                goToStart();
+                break;
+        }
+    });
+
+    // Erster Start beim Laden der Anwendung
+    window.onload = function() {
+        updateCard();
+    };
+</script>
+
+</body>
+</html>
