@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Übung: Audio-Hörübung</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 600px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: var(--border-color);
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 20%;
+            transition: width 0.3s ease;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        p.instruction {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .audio-box {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .audio-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
+            transition: all 0.2s;
+        }
+
+        .audio-btn:hover {
+            background-color: #357abd;
+            transform: scale(1.02);
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background-color: #ffffff;
+            border: 2px solid var(--border-color);
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            text-align: left;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+
+        @media (hover: hover) {
+            .option-btn:hover:not(.disabled) {
+                border-color: var(--primary-color);
+                background-color: #f0f7ff;
+            }
+        }
+
+        /* Feedback-Zustände */
+        .option-btn.correct {
+            background-color: #e8f8f0;
+            border-color: var(--success-color);
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .option-btn.wrong {
+            background-color: #fdedec;
+            border-color: var(--error-color);
+            color: var(--error-color);
+        }
+
+        .option-btn.disabled {
+            pointer-events: none;
+        }
+
+        .feedback-text {
+            text-align: center;
+            font-weight: 600;
+            min-height: 40px;
+            margin-top: 15px;
+            line-height: 1.4;
+        }
+
+        .nav-btn {
+            display: block;
+            width: 100%;
+            max-width: 180px;
+            margin: 15px auto 0 auto;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #357abd;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--border-color);
+            color: #7f8c8d;
+        }
+
+        .btn-outline:hover {
+            background-color: #f8f9fa;
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+    </div>
+
+    <h2 id="headline">Hörübung: Aufgabe 1 von 5</h2>
+    <p class="instruction">Klicke auf den Button, höre genau zu und wähle die korrekte deutsche Übersetzung aus.</p>
+
+    <div class="audio-box">
+        <button class="audio-btn" onclick="playAudio()">
+            🔊 Satz anhören
+        </button>
+    </div>
+
+    <div class="options-list" id="options-container">
+        <!-- Optionen werden per JS generiert -->
+    </div>
+
+    <div class="feedback-text" id="feedback-zone"></div>
+
+    <button class="nav-btn btn-primary" id="next-btn" style="display: none;" onclick="nextQuestion()">Nächste Aufgabe</button>
+    <button class="nav-btn btn-outline" id="reset-btn" onclick="resetQuiz()">Neustart</button>
+</div>
+
+<script>
+    const quizData = [
+        {
+            russianText: "Что у вас нового?",
+            options: [
+                { text: "Was gibt es bei euch Neues?", correct: true },
+                { text: "Wer bist du?", correct: false },
+                { text: "Was machst du morgen?", correct: false }
+            ]
+        },
+        {
+            russianText: "Привет!",
+            options: [
+                { text: "Guten Tag!", correct: false },
+                { text: "Hallo!", correct: true },
+                { text: "Auf Wiedersehen!", correct: false }
+            ]
+        },
+        {
+            russianText: "Что нового?",
+            options: [
+                { text: "Wie geht es dir?", correct: false },
+                { text: "Was gibt es Neues?", correct: true },
+                { text: "Wo bist du?", correct: false }
+            ]
+        },
+        {
+            russianText: "Напишите в комментариях",
+            options: [
+                { text: "Lest das Buch", correct: false },
+                { text: "Schreibt in die Kommentare", correct: true },
+                { text: "Sprecht mir nach", correct: false }
+            ]
+        },
+        {
+            russianText: "Что случилось в твоей жизни?",
+            options: [
+                { text: "Was ist in deinem Leben passiert?", correct: true },
+                { text: "Wie alt bist du geworden?", correct: false },
+                { text: "Wann hast du Zeit?", correct: false }
+            ]
+        }
+    ];
+
+    let currentIndex = 0;
+    let hasAnswered = false;
+    let russianVoice = null;
+
+    // Funktion, um gezielt eine russische, männliche Stimme zu suchen
+    function loadVoices() {
+        if (!('speechSynthesis' in window)) return;
+        
+        const voices = window.speechSynthesis.getVoices();
+        // Suche nach russischen Stimmen (ru-RU)
+        const ruVoices = voices.filter(v => v.lang.includes('ru'));
+        
+        // Versuche eine männliche Stimme anhand gängiger Namen zu finden (z.B. Pavel, Maxim, Aleksandr)
+        const maleVoice = ruVoices.find(v => 
+            v.name.toLowerCase().includes('pavel') || 
+            v.name.toLowerCase().includes('maxim') || 
+            v.name.toLowerCase().includes('alex') || 
+            v.name.toLowerCase().includes('male')
+        );
+
+        // Nutze die männliche Stimme, falls vorhanden. Sonst irgendeine russische Stimme.
+        russianVoice = maleVoice || ruVoices[0] || null;
+    }
+
+    // Die Stimmenliste lädt asynchron, daher Event-Listener nutzen
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
+    }
+
+    function loadQuestion() {
+        hasAnswered = false;
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('feedback-zone').innerText = '';
+        
+        const currentQuiz = quizData[currentIndex];
+        
+        document.getElementById('headline').innerText = `Hörübung: Aufgabe ${currentIndex + 1} von 5`;
+        document.getElementById('progress').style.width = `${((currentIndex + 1) / quizData.length) * 100}%`;
+
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+
+        // Automatisch abspielen verhindern (Browser-Sicherheitsrichtlinie), stattdessen Optionen rendern
+        currentQuiz.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt.text;
+            btn.addEventListener('click', () => handleSelection(btn, opt.correct));
+            container.appendChild(btn);
+        });
+    }
+
+    function playAudio() {
+        if (!('speechSynthesis' in window)) {
+            alert("Die Sprachausgabe wird von deinem Browser leider nicht unterstützt.");
+            return;
+        }
+
+        // Eventuelle laufende Sprachausgaben abbrechen
+        window.speechSynthesis.cancel();
+
+        const currentText = quizData[currentIndex].russianText;
+        const utterance = new SpeechSynthesisUtterance(currentText);
+        
+        if (russianVoice) {
+            utterance.voice = russianVoice;
+        } else {
+            // Fallback, falls keine spezifische Stimme registriert ist
+            utterance.lang = 'ru-RU'; 
+        }
+        
+        utterance.rate = 0.85; // Leicht verlangsamt für optimales Lernen
+        utterance.pitch = 0.9; // Etwas tiefer eingestellt für ein maskulineres Klangbild, falls generisch
+        
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function handleSelection(selectedBtn, isCorrect) {
+        if (hasAnswered) return;
+        hasAnswered = true;
+
+        const allButtons = document.querySelectorAll('.option-btn');
+        const feedbackEl = document.getElementById('feedback-zone');
+
+        allButtons.forEach(btn => btn.classList.add('disabled'));
+
+        if (isCorrect) {
+            selectedBtn.classList.add('correct');
+            feedbackEl.innerText = "Hervorragend! Das war komplett richtig. 🎉";
+            feedbackEl.style.color = 'var(--success-color)';
+        } else {
+            selectedBtn.classList.add('wrong');
+            feedbackEl.innerText = "Schade, das war die falsche Übersetzung. Höre noch mal genau hin!";
+            feedbackEl.style.color = 'var(--error-color)';
+
+            // Richtige Antwort zur Auflösung grün markieren
+            quizData[currentIndex].options.forEach((opt, idx) => {
+                if (opt.correct) {
+                    allButtons[idx].classList.add('correct');
+                }
+            });
+        }
+
+        if (currentIndex < quizData.length - 1) {
+            document.getElementById('next-btn').style.display = 'block';
+        } else {
+            feedbackEl.innerText += "\n\n🏆 Fantastisch! Du hast alle Höraufgaben absolviert.";
+            feedbackEl.style.color = 'var(--text-color)';
+        }
+    }
+
+    function nextQuestion() {
+        if (currentIndex < quizData.length - 1) {
+            currentIndex++;
+            loadQuestion();
+        }
+    }
+
+    function resetQuiz() {
+        currentIndex = 0;
+        loadQuestion();
+    }
+
+    window.onload = loadQuestion;
+</script>
+
+</body>
+</html>
