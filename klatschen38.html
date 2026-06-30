@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Übung: Fliegenklatschen-Spiel</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 600px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        /* Zeitbalken */
+        .timer-bar {
+            width: 100%;
+            height: 8px;
+            background-color: var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .timer-fill {
+            height: 100%;
+            background-color: #f39c12;
+            width: 100%;
+            transition: width 0.1s linear;
+        }
+
+        .target-box {
+            background-color: #e3effd;
+            border: 2px dashed var(--primary-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .target-box span {
+            display: block;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+
+        .target-word {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Das Fliegen-Grid */
+        .fly-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .fly-card {
+            background: #ffffff;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 70px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        @media (hover: hover) {
+            .fly-card:hover:not(.disabled) {
+                border-color: #34495e;
+                background-color: #f8fafc;
+                transform: scale(1.02);
+            }
+        }
+
+        .fly-card.disabled {
+            pointer-events: none;
+        }
+
+        /* Klatschen-Effekte */
+        .fly-card.hit-correct {
+            background-color: var(--success-color) !important;
+            border-color: var(--success-color) !important;
+            color: white !important;
+            animation: pop 0.3s ease;
+        }
+
+        .fly-card.hit-wrong {
+            background-color: var(--error-color) !important;
+            border-color: var(--error-color) !important;
+            color: white !important;
+            opacity: 0.6;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .result-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 20px 0;
+        }
+
+        .result-score {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .nav-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .nav-btn:hover {
+            background-color: #357abd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="game-container">
+    <!-- Spielbildschirm -->
+    <div id="play-screen">
+        <div class="header-info">
+            <div id="round-counter">Runde: 1 / 5</div>
+            <div id="score-counter">Punkte: 0</div>
+        </div>
+
+        <div class="timer-bar">
+            <div class="timer-fill" id="timer"></div>
+        </div>
+
+        <div class="target-box">
+            <span>Klatsche das russische Wort für:</span>
+            <div class="target-word" id="target-display">Neuigkeiten</div>
+        </div>
+
+        <div class="fly-grid" id="fly-container">
+            <!-- 4 russische Wörter werden hier dynamisch erzeugt -->
+        </div>
+    </div>
+
+    <!-- Ergebnisbildschirm -->
+    <div class="result-screen" id="end-screen">
+        <h2>Spiel beendet! 🪰🔨</h2>
+        <div class="result-score" id="final-score">0 / 5 richtig</div>
+        <p id="final-comment">Gutes Tempo! Versuche es gleich noch einmal.</p>
+        <button class="nav-btn" onclick="startGame()">Erneut spielen</button>
+    </div>
+</div>
+
+<script>
+    // Pool an Vokabeln für das Spiel
+    const vocabulary = [
+        { de: "Neuigkeiten", ru: "нового" },
+        { de: "Hallo / Privat", ru: "Привет" },
+        { de: "Nichts", ru: "Ничего" },
+        { de: "Besonderes", ru: "особенного" },
+        { de: "Kommentare", ru: "комментариях" },
+        { de: "alles", ru: "всё" },
+        { de: "beim Alten", ru: "по-старому" },
+        { de: "Leben", ru: "жизни" }
+    ];
+
+    let currentRound = 0;
+    const totalRounds = 5;
+    let score = 0;
+    let timerInterval = null;
+    let timeLeft = 100;
+    let isRoundActive = false;
+
+    function startGame() {
+        score = 0;
+        currentRound = 0;
+        document.getElementById('play-screen').style.display = 'block';
+        document.getElementById('end-screen').style.display = 'none';
+        nextRound();
+    }
+
+    function nextRound() {
+        if (currentRound >= totalRounds) {
+            endGame();
+            return;
+        }
+
+        currentRound++;
+        isRoundActive = true;
+        document.getElementById('round-counter').innerText = `Runde: ${currentRound} / ${totalRounds}`;
+        document.getElementById('score-counter').innerText = `Punkte: ${score}`;
+        
+        // Richtige Vokabel auswürfeln
+        const correctItem = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+        document.getElementById('target-display').innerText = correctItem.de;
+
+        // Falsche Vokabeln dazumischen (3 Stück)
+        let fakes = vocabulary.filter(item => item.ru !== correctItem.ru);
+        fakes = fakes.sort(() => Math.random() - 0.5).slice(0, 3);
+
+        // Alle 4 Optionen vereinen und durchmischen
+        const options = [correctItem, ...fakes].sort(() => Math.random() - 0.5);
+
+        // Grid befüllen
+        const container = document.getElementById('fly-container');
+        container.innerHTML = '';
+
+        options.forEach(opt => {
+            const card = document.createElement('div');
+            card.className = 'fly-card';
+            card.innerText = opt.ru;
+            card.addEventListener('click', () => handleFlyClick(card, opt.ru === correctItem.ru));
+            container.appendChild(card);
+        });
+
+        // Timer starten (5 Sekunden pro Runde)
+        timeLeft = 100;
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeLeft -= 2; // Sinkgeschwindigkeit
+            document.getElementById('timer').style.width = timeLeft + '%';
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timeOut(correctItem.ru);
+            }
+        }, 100);
+    }
+
+    function handleFlyClick(selectedCard, isCorrect) {
+        if (!isRoundActive) return;
+        isRoundActive = false;
+        clearInterval(timerInterval);
+
+        const allCards = document.querySelectorAll('.fly-card');
+        allCards.forEach(c => c.classList.add('disabled'));
+
+        if (isCorrect) {
+            selectedCard.classList.add('hit-correct');
+            score++;
+            document.getElementById('score-counter').innerText = `Punkte: ${score}`;
+        } else {
+            selectedCard.classList.add('hit-wrong');
+            // Richtige Karte zeigen
+            allCards.forEach(c => {
+                if (vocabulary.find(v => v.ru === c.innerText && document.getElementById('target-display').innerText === v.de)) {
+                    c.classList.add('hit-correct');
+                }
+            });
+        }
+
+        // Kurze Verschnaufpause vor nächster Runde
+        setTimeout(nextRound, 1200);
+    }
+
+    function timeOut(correctRu) {
+        isRoundActive = false;
+        const allCards = document.querySelectorAll('.fly-card');
+        allCards.forEach(c => {
+            c.classList.add('disabled');
+            if (c.innerText === correctRu) {
+                c.classList.add('hit-correct'); // Richtige Antwort auflösen
+            }
+        });
+        setTimeout(nextRound, 1200);
+    }
+
+    function endGame() {
+        document.getElementById('play-screen').style.display = 'none';
+        document.getElementById('end-screen').style.display = 'flex';
+        document.getElementById('final-score').innerText = `${score} / ${totalRounds} richtig`;
+
+        const comment = document.getElementById('final-comment');
+        if (score === totalRounds) {
+            comment.innerText = "⚡ Absoluter Rekord! Du hast die Fliegen perfekt abgeklatscht!";
+        } else if (score >= 3) {
+            comment.innerText = "Gutes Auge! Du erkennst die kyrillischen Schlüsselwörter schon recht flott.";
+        } else {
+            comment.innerText = "Keine Sorge, das braucht Übung. Versuch es direkt noch einmal!";
+        }
+    }
+
+    // Direkt beim Laden starten
+    window.onload = startGame;
+</script>
+
+</body>
+</html>
